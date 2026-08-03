@@ -1,0 +1,147 @@
+{
+  "communities": {
+    "0": [
+      "app_canvastoblob",
+      "app_currentformat",
+      "app_drawcanvas",
+      "app_fittobudget",
+      "app_num",
+      "app_runprocess",
+      "app_targetdimensions"
+    ],
+    "1": [
+      "app_bind",
+      "app_loadfile",
+      "app_onunitchange",
+      "app_reset",
+      "app_scheduleprocess",
+      "app_syncautoui"
+    ],
+    "2": [
+      "app",
+      "app_applyresult",
+      "app_extfor",
+      "app_fmtbytes",
+      "app_setstatus"
+    ]
+  },
+  "cohesion": {
+    "0": 0.38095238095238093,
+    "1": 0.4,
+    "2": 0.7
+  },
+  "gods": [
+    {
+      "id": "app_runprocess",
+      "label": "runProcess()",
+      "degree": 11
+    },
+    {
+      "id": "app_bind",
+      "label": "bind()",
+      "degree": 6
+    },
+    {
+      "id": "app_applyresult",
+      "label": "applyResult()",
+      "degree": 5
+    },
+    {
+      "id": "app_scheduleprocess",
+      "label": "scheduleProcess()",
+      "degree": 4
+    },
+    {
+      "id": "app_loadfile",
+      "label": "loadFile()",
+      "degree": 4
+    },
+    {
+      "id": "app_fmtbytes",
+      "label": "fmtBytes()",
+      "degree": 3
+    },
+    {
+      "id": "app_num",
+      "label": "num()",
+      "degree": 3
+    },
+    {
+      "id": "app_targetdimensions",
+      "label": "targetDimensions()",
+      "degree": 3
+    },
+    {
+      "id": "app_canvastoblob",
+      "label": "canvasToBlob()",
+      "degree": 3
+    },
+    {
+      "id": "app_fittobudget",
+      "label": "fitToBudget()",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "scheduleProcess()",
+      "target": "runProcess()",
+      "source_files": [
+        "app.js",
+        "app.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "note": "Bridges community 1 → community 0"
+    },
+    {
+      "source": "loadFile()",
+      "target": "fmtBytes()",
+      "source_files": [
+        "app.js",
+        "app.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 2 → community 1"
+    },
+    {
+      "source": "runProcess()",
+      "target": "applyResult()",
+      "source_files": [
+        "app.js",
+        "app.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 0 → community 2"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `runProcess()` connect `runProcess` to `bind`, `app.js`?",
+      "why": "High betweenness centrality (0.152) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `bind()` connect `bind` to `app.js`?",
+      "why": "High betweenness centrality (0.032) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `applyResult()` connect `app.js` to `runProcess`?",
+      "why": "High betweenness centrality (0.017) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `bind()` (e.g. with `onUnitChange()` and `reset()`) actually correct?",
+      "why": "`bind()` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `scheduleProcess()` (e.g. with `bind()` and `runProcess()`) actually correct?",
+      "why": "`scheduleProcess()` has 2 INFERRED edges - model-reasoned connections that need verification."
+    }
+  ]
+}

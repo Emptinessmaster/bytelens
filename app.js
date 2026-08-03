@@ -13,6 +13,8 @@
 
 (function () {
   const $ = (sel) => document.querySelector(sel);
+  // Traduzione: usa i18n.js se presente, altrimenti il fallback italiano.
+  const T = (key, fallback) => (window.I18N ? window.I18N.t(key) : fallback);
 
   // ---- Riferimenti DOM ----
   const el = {
@@ -140,7 +142,7 @@
     if (!state.bitmap) return;
     if (state.busy) { state.queued = true; return; }
     state.busy = true;
-    setStatus('Elaborazione…', 'neutral');
+    setStatus(T('status_processing', 'Elaborazione…'), 'neutral');
 
     try {
       const mime = currentFormat();
@@ -171,7 +173,7 @@
       applyResult(blob, w, h, mime, maxBytes, auto, isLossy);
     } catch (err) {
       console.error(err);
-      setStatus('Errore di elaborazione', 'over');
+      setStatus(T('status_error', 'Errore di elaborazione'), 'over');
     } finally {
       state.busy = false;
       if (state.queued) { state.queued = false; runProcess(); }
@@ -224,14 +226,14 @@
 
     if (overBudget) {
       if (!isLossy) {
-        setStatus('PNG senza perdita: usa JPG/WebP per rientrare', 'over');
+        setStatus(T('status_png_over', 'PNG senza perdita: usa JPG/WebP per rientrare'), 'over');
       } else {
-        setStatus('Impossibile scendere oltre a questa risoluzione', 'over');
+        setStatus(T('status_res_limit', 'Impossibile scendere oltre questa risoluzione'), 'over');
       }
     } else if (auto && isLossy) {
-      setStatus('Rientra nei limiti ✓', 'ok');
+      setStatus(T('status_within', 'Rientra nei limiti ✓'), 'ok');
     } else {
-      setStatus('Pronta', 'ok');
+      setStatus(T('status_ready', 'Pronta'), 'ok');
     }
 
     // badge formato
@@ -243,7 +245,7 @@
     el.downloadBtn.href = state.outUrl;
     el.downloadBtn.download = base + '-bytelens.' + extFor(mime);
     el.downloadBtn.setAttribute('aria-disabled', 'false');
-    el.downloadLabel.textContent = 'Scarica ' + fmtBytes(blob.size);
+    el.downloadLabel.textContent = T('download_prefix', 'Scarica') + ' ' + fmtBytes(blob.size);
   }
 
   function setStatus(msg, kind) {
@@ -256,7 +258,7 @@
   // ---- Caricamento file ----
   async function loadFile(file) {
     if (!file || !/^image\/(png|jpeg|webp)$/.test(file.type)) {
-      alert('Formato non supportato. Usa JPG, PNG o WebP.');
+      alert(T('alert_format', 'Formato non supportato. Usa JPG, PNG o WebP.'));
       return;
     }
     try {
@@ -283,7 +285,7 @@
       runProcess();
     } catch (err) {
       console.error(err);
-      alert('Impossibile leggere l\'immagine. Prova con un altro file.');
+      alert(T('alert_read', 'Impossibile leggere l\'immagine. Prova con un altro file.'));
     }
   }
 
@@ -392,6 +394,12 @@
     });
 
     el.year.textContent = new Date().getFullYear();
+
+    // Al cambio lingua: se un'immagine è caricata, ri-elabora per aggiornare
+    // le etichette dinamiche (stato, peso nel pulsante di download).
+    window.addEventListener('i18n:change', () => {
+      if (state.bitmap) scheduleProcess();
+    });
   }
 
   // ---- Avvio ----
