@@ -16,7 +16,7 @@
 - **Formati** JPG, WebP, PNG. Anteprima prima/dopo con % di risparmio.
 - **Privacy totale** — elaborazione 100% client-side (HTML Canvas), nessun server.
 - **Tema chiaro/scuro** con preferenza salvata.
-- **Pronto per la monetizzazione** — slot AdSense non invasivi + pulsanti donazione.
+- **Spazi predisposti** — slot pubblicitari non invasivi + pulsanti donazione già integrati.
 - **SEO** — meta tag, Open Graph, dati strutturati, `sitemap.xml`, `robots.txt`.
 
 ---
@@ -39,7 +39,7 @@
 
 ---
 
-## 💶 Attivare i guadagni
+## ⚙️ Configurare pubblicità e donazioni
 
 ### 1) Banner pubblicitari — Google AdSense
 1. Iscriviti su [Google AdSense](https://adsense.google.com/) e fatti approvare il sito (serve traffico reale e la pagina Privacy — già inclusa in `privacy.html`).
@@ -58,27 +58,6 @@ In `index.html` e in `.github/FUNDING.yml` sostituisci i placeholder `TUONOME` /
 - [GitHub Sponsors](https://github.com/sponsors)
 
 Con `FUNDING.yml` compilato, GitHub mostra automaticamente il pulsante **Sponsor** in cima al repo.
-
----
-
-## 📈 Come arrivare a ~1000€/mese (strategia realistica)
-
-I ricavi dipendono dal **traffico**. Ordine di grandezza indicativo per uno strumento come questo (CPM/RPM tipico €3–€12 per mille visite, molto variabile per lingua e nicchia):
-
-| Visite/mese | Ricavo pubblicità stimato |
-|---|---|
-| 20.000 | ~€60–€240 |
-| 100.000 | ~€300–€1.200 |
-| 300.000 | ~€900–€3.600 |
-
-Le donazioni aggiungono un extra variabile. Per crescere:
-
-- **Pubblica più strumenti** (è la tua idea giusta): convertitore di formato, generatore di favicon, crop per social, compressore PDF, rimozione sfondo… Ogni pagina è una porta d'ingresso da Google. Questo repo è pensato come **template riutilizzabile**: cambi logica in `app.js` e testi, il design resta.
-- **SEO**: titoli e descrizioni mirati a query reali ("comprimere immagine sotto 2 mb", "ridimensiona 1920x1080"). Sono già impostati qui come esempio.
-- **Contenuti**: una breve guida testuale sotto lo strumento aiuta il posizionamento.
-- **Velocità**: essendo statico e client-side, il sito è velocissimo — Google lo premia.
-
-> Nota onesta: nessuno può garantire una cifra. Questo progetto ti dà una base tecnica e di design di qualità professionale; il fattore decisivo sarà quanto traffico riesci a portare.
 
 ---
 
