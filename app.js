@@ -94,20 +94,19 @@
     return v;
   }
 
-  // Calcola le dimensioni target rispettando limiti px + scala manuale
+  // Calcola le dimensioni target: larghezza e altezza vengono limitate in modo
+  // INDIPENDENTE, senza vincolo di proporzioni. Impostando maxW/maxH diversi
+  // dal rapporto originale, l'immagine viene deformata di conseguenza
+  // (es. 1920x1080 con maxW 900 -> 900x1080: solo la larghezza si riduce).
   function targetDimensions() {
     const maxW = Math.min(num(el.maxW, state.origW, 1), MAX_ALLOWED.w);
     const maxH = Math.min(num(el.maxH, state.origH, 1), MAX_ALLOWED.h);
     const scale = (parseInt(el.scale.value, 10) || 100) / 100;
 
-    let w = state.origW * scale;
-    let h = state.origH * scale;
-
-    // rientra nel bounding box max mantenendo proporzioni
-    const ratio = Math.min(maxW / w, maxH / h, 1);
-    w = Math.round(w * ratio);
-    h = Math.round(h * ratio);
-    return { w: Math.max(1, w), h: Math.max(1, h) };
+    // scala uniforme (percentuale), poi limite indipendente per ciascun lato
+    const w = Math.min(state.origW * scale, maxW);
+    const h = Math.min(state.origH * scale, maxH);
+    return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)) };
   }
 
   // Disegna il bitmap su canvas alle dimensioni date

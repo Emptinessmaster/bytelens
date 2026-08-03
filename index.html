@@ -203,7 +203,7 @@
                 <output class="field-value" id="scaleVal" for="scale">100%</output>
               </div>
               <input type="range" id="scale" min="5" max="100" step="1" value="100" />
-              <p class="field-hint">Riduce larghezza e altezza mantenendo le proporzioni.</p>
+              <p class="field-hint">Riduce le dimensioni in modo uniforme (in percentuale).</p>
             </div>
 
             <!-- FORMATO -->
@@ -279,7 +279,7 @@
         <p>Imposta <strong>Peso massimo</strong> su <code>2 MB</code> e lascia attiva la modalità automatica: ByteLens calcola la qualità più alta possibile che mantiene il file sotto la soglia, così ottieni il miglior compromesso tra leggerezza e nitidezza. È il metodo ideale quando un modulo online richiede, ad esempio, un allegato che non superi un certo peso.</p>
 
         <h3>Ridimensionare a 1920×1080 (Full HD) o altre misure esatte</h3>
-        <p>Nei campi <strong>Larghezza max</strong> e <strong>Altezza max</strong> inserisci le dimensioni desiderate (ad esempio <code>1920 × 1080</code> per un banner Full HD). L'immagine viene rimpicciolita mantenendo le proporzioni originali, senza deformarsi, finché non rientra nel riquadro indicato. Per un ritocco più fine puoi usare anche il cursore <strong>Scala dimensioni</strong>.</p>
+        <p>Nei campi <strong>Larghezza max</strong> e <strong>Altezza max</strong> imposti le dimensioni desiderate (ad esempio <code>1920 × 1080</code> per un banner Full HD). Ogni lato viene regolato in modo <strong>indipendente</strong>: se riduci solo la larghezza, l'altezza resta invariata. Per ridurre le dimensioni in modo uniforme puoi usare il cursore <strong>Scala dimensioni</strong>.</p>
 
         <h3>JPG, WebP o PNG: quale formato scegliere?</h3>
         <ul class="seo-list">
@@ -303,7 +303,7 @@
         </details>
         <details class="faq-item">
           <summary>Posso impostare dimensioni precise in pixel?</summary>
-          <p>Sì. Inserisci larghezza e altezza massime (ad esempio 1920×1080). L'immagine viene ridimensionata mantenendo le proporzioni, così non risulta mai deformata né più grande dei limiti indicati.</p>
+          <p>Sì. Inserisci larghezza e altezza massime (ad esempio 1920×1080). Ogni dimensione viene applicata in modo indipendente: riducendo solo la larghezza, l'altezza non cambia. L'immagine non supera mai i limiti indicati.</p>
         </details>
         <details class="faq-item">
           <summary>Perché in modalità automatica la qualità cambia da sola?</summary>
@@ -331,7 +331,7 @@
         { "@type": "Question", "name": "Come porto un'immagine esattamente sotto i 2 MB?",
           "acceptedAnswer": { "@type": "Answer", "text": "Imposta il campo Peso massimo su 2 MB con la modalità automatica attiva. Lo strumento riduce progressivamente la qualità, e se necessario la risoluzione, finché il file non rientra sotto la soglia mantenendo la migliore qualità possibile." } },
         { "@type": "Question", "name": "Posso impostare dimensioni precise in pixel?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sì. Inserisci larghezza e altezza massime, ad esempio 1920x1080. L'immagine viene ridimensionata mantenendo le proporzioni, senza deformarsi né superare i limiti indicati." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "Sì. Inserisci larghezza e altezza massime, ad esempio 1920x1080. Ogni dimensione viene applicata in modo indipendente: riducendo solo la larghezza, l'altezza non cambia, e l'immagine non supera mai i limiti indicati." } },
         { "@type": "Question", "name": "Perché in modalità automatica la qualità cambia da sola?",
           "acceptedAnswer": { "@type": "Answer", "text": "In automatico ByteLens cerca il valore di qualità più alto che rispetta il peso massimo impostato, spostando il cursore sul valore ottimale calcolato." } },
         { "@type": "Question", "name": "ByteLens è gratuito?",
