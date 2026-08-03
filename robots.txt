@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://emptinessmaster.github.io/bytelens/sitemap.xml

@@ -1,0 +1,9 @@
+# Abilita il pulsante "Sponsor" in cima al repository GitHub.
+# La riga "github" è già impostata sul tuo account.
+# Per attivare gli altri, togli il "#" e inserisci i tuoi username/ID reali.
+
+github: [Emptinessmaster]          # GitHub Sponsors (richiede attivazione su github.com/sponsors)
+# ko_fi: TUONOME                   # https://ko-fi.com/TUONOME
+# buy_me_a_coffee: TUONOME         # https://www.buymeacoffee.com/TUONOME
+# custom:
+#   - "https://www.paypal.com/donate/?hosted_button_id=TUO_ID"
