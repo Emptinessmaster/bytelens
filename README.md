@@ -4,6 +4,10 @@
 
 > App web statica, senza build e senza backend. Funziona aprendo semplicemente `index.html`.
 
+### [▶ Apri ByteLens](https://emptinessmaster.github.io/bytelens/)
+
+[![Apri l'applicazione](https://img.shields.io/badge/▶%20Apri%20l'applicazione-ByteLens-F6A623?style=for-the-badge&logo=googlechrome&logoColor=white)](https://emptinessmaster.github.io/bytelens/)
+
 ![Stack](https://img.shields.io/badge/stack-HTML%20%2B%20CSS%20%2B%20JS-F6A623) ![No backend](https://img.shields.io/badge/backend-nessuno-34D399) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ---
