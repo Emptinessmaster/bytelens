@@ -2,28 +2,35 @@
 
 **Comprimi e ridimensiona immagini direttamente nel browser.** Imposta un peso massimo (MB) e una risoluzione massima (px) e ByteLens porta l'immagine esattamente in quello stato — oppure regola qualità e dimensioni a mano. Nessun upload: i file non lasciano mai il dispositivo dell'utente.
 
-> App web statica, senza build e senza backend. Perfetta da pubblicare gratis su **GitHub Pages**.
+> App web statica, senza build e senza backend. Funziona aprendo semplicemente `index.html`.
 
-![Vanilla JS](https://img.shields.io/badge/stack-HTML%20%2B%20CSS%20%2B%20JS-F6A623) ![No backend](https://img.shields.io/badge/backend-nessuno-34D399) ![License](https://img.shields.io/badge/license-MIT-blue)
+![Stack](https://img.shields.io/badge/stack-HTML%20%2B%20CSS%20%2B%20JS-F6A623) ![No backend](https://img.shields.io/badge/backend-nessuno-34D399) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ---
 
 ## ✨ Caratteristiche
 
-- **Limiti automatici** — max peso (MB) + max larghezza/altezza (px): l'immagine rientra da sola.
-- **Controllo manuale** — slider di qualità e di scala per il pieno controllo.
+- **Limiti automatici** — imposti max peso (MB) e max larghezza/altezza (px): l'immagine rientra da sola in entrambi.
+- **Controllo manuale** — slider di qualità e di scala per regolare tutto a mano.
 - **Ricerca binaria della qualità** per centrare il peso obiettivo in pochi passaggi.
-- **Formati** JPG, WebP, PNG. Anteprima prima/dopo con % di risparmio.
-- **Privacy totale** — elaborazione 100% client-side (HTML Canvas), nessun server.
+- **Formati** JPG, WebP e PNG, con anteprima prima/dopo e percentuale di risparmio.
+- **Privacy totale** — elaborazione 100% client-side tramite HTML Canvas: nessun server, nessun upload.
+- **Drag & drop e incolla** — trascina un file o incolla un'immagine dagli appunti.
 - **Tema chiaro/scuro** con preferenza salvata.
-- **Spazi predisposti** — slot pubblicitari non invasivi + pulsanti donazione già integrati.
-- **SEO** — meta tag, Open Graph, dati strutturati, `sitemap.xml`, `robots.txt`.
 
 ---
 
-## 🚀 Pubblicazione su GitHub Pages (5 minuti)
+## 🕹️ Come si usa
 
-1. Crea un repository su GitHub (es. `bytelens`) e carica questi file.
+1. **Carica** un'immagine: trascinala nell'area, selezionala o incollala (Ctrl/Cmd+V).
+2. **Imposta i limiti** di peso e dimensioni, oppure disattiva la modalità automatica e regola qualità e scala con i cursori.
+3. **Scarica** l'immagine ottimizzata: il pulsante mostra il peso finale del file.
+
+---
+
+## 🚀 Pubblicazione su GitHub Pages
+
+1. Carica i file nel repository.
    ```bash
    git init
    git add .
@@ -33,46 +40,7 @@
    git push -u origin main
    ```
 2. Su GitHub: **Settings → Pages → Source: `Deploy from a branch` → `main` / `root`**.
-3. Dopo ~1 minuto il sito è online su `https://emptinessmaster.github.io/bytelens/`.
-
-> Suggerimento: per un dominio personalizzato (es. `bytelens.it`) aggiungi un file `CNAME` con il dominio e configura i DNS.
-
----
-
-## ⚙️ Configurare pubblicità e donazioni
-
-### 1) Banner pubblicitari — Google AdSense
-1. Iscriviti su [Google AdSense](https://adsense.google.com/) e fatti approvare il sito (serve traffico reale e la pagina Privacy — già inclusa in `privacy.html`).
-2. In `index.html` cerca i commenti `GOOGLE ADSENSE` e `SLOT ADSENSE`:
-   - incolla lo **script** nel `<head>` con il tuo `ca-pub-XXXXXXXXXXXXXXXX`;
-   - incolla i **blocchi annuncio** dentro gli slot già predisposti (`.ad-slot`).
-3. Crea `ads.txt` nella root con la riga fornita da AdSense (c'è un modello in `ads.txt`).
-
-Gli slot sono volutamente **slim e sotto lo strumento / nel footer**: non coprono l'app, così rispettano le regole AdSense e non infastidiscono l'utente.
-
-### 2) Donazioni volontarie
-In `index.html` e in `.github/FUNDING.yml` sostituisci i placeholder `TUONOME` / `TUO_ID` con i tuoi link reali:
-- [Buy Me a Coffee](https://www.buymeacoffee.com/)
-- [Ko-fi](https://ko-fi.com/)
-- [PayPal Donate](https://www.paypal.com/donate/buttons)
-- [GitHub Sponsors](https://github.com/sponsors)
-
-Con `FUNDING.yml` compilato, GitHub mostra automaticamente il pulsante **Sponsor** in cima al repo.
-
----
-
-## 🧩 Riutilizzare come template
-
-Struttura pensata per clonare pagine simili:
-
-```
-index.html      → markup + slot pubblicità + donazioni
-styles.css      → sistema di design (token colore/tipografia, temi)
-app.js          → SOLO la logica dello strumento — è qui che cambi funzione
-privacy.html    → richiesta da AdSense
-```
-
-Per un nuovo strumento: duplica la cartella, riscrivi la logica in `app.js`, aggiorna testi/SEO. Il look professionale è già pronto.
+3. Dopo circa un minuto il sito è online su `https://emptinessmaster.github.io/bytelens/`.
 
 ---
 
@@ -84,6 +52,19 @@ Nessuna dipendenza. Apri `index.html` nel browser, oppure servi la cartella:
 python -m http.server 8000
 # poi apri http://localhost:8000
 ```
+
+---
+
+## 🧱 Struttura del progetto
+
+```
+index.html      → interfaccia dell'applicazione
+styles.css      → stile e sistema di temi (chiaro/scuro)
+app.js          → logica di compressione e ridimensionamento
+privacy.html    → informativa sulla privacy
+```
+
+---
 
 ## 📄 Licenza
 
