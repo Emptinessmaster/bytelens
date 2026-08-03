@@ -166,8 +166,11 @@
               <div class="field">
                 <label class="field-label" for="maxSize">Peso massimo</label>
                 <div class="input-affix">
-                  <input type="number" id="maxSize" min="0.05" step="0.1" value="2" inputmode="decimal" />
-                  <span class="affix">MB</span>
+                  <input type="number" id="maxSize" min="0.01" step="0.1" value="2" inputmode="decimal" />
+                  <select class="affix affix-select" id="maxSizeUnit" aria-label="Unità di misura del peso">
+                    <option value="MB" selected>MB</option>
+                    <option value="KB">KB</option>
+                  </select>
                 </div>
               </div>
               <div class="field">

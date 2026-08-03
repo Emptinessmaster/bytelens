@@ -29,6 +29,7 @@
 
     autoMode:    $('#autoMode'),
     maxSize:     $('#maxSize'),
+    maxSizeUnit: $('#maxSizeUnit'),
     maxW:        $('#maxW'),
     maxH:        $('#maxH'),
     quality:     $('#quality'),
@@ -148,7 +149,8 @@
       const canvas = drawCanvas(w, h);
 
       const auto = el.autoMode.checked;
-      const maxBytes = num(el.maxSize, Infinity, 0.01) * 1024 * 1024;
+      const unitFactor = el.maxSizeUnit.value === 'KB' ? 1024 : 1024 * 1024;
+      const maxBytes = num(el.maxSize, Infinity) * unitFactor;
 
       let blob, usedQuality;
 
@@ -305,6 +307,22 @@
     el.downloadLabel.textContent = 'Scarica immagine';
   }
 
+  // ---- Cambio unità di misura del peso (MB <-> KB) con conversione del valore ----
+  function onUnitChange() {
+    const prev = el.maxSizeUnit.dataset.prev || 'MB';
+    const cur = el.maxSizeUnit.value;
+    let v = parseFloat(el.maxSize.value);
+    if (isFinite(v) && v > 0 && prev !== cur) {
+      if (prev === 'MB' && cur === 'KB') v = Math.round(v * 1024);
+      else if (prev === 'KB' && cur === 'MB') v = Math.round((v / 1024) * 1000) / 1000;
+      el.maxSize.value = v;
+    }
+    if (cur === 'KB') { el.maxSize.step = '10'; el.maxSize.min = '1'; }
+    else { el.maxSize.step = '0.1'; el.maxSize.min = '0.01'; }
+    el.maxSizeUnit.dataset.prev = cur;
+    scheduleProcess();
+  }
+
   // ---- Sync UI qualità/modalità ----
   function syncAutoUI() {
     const auto = el.autoMode.checked;
@@ -353,6 +371,8 @@
 
     // controlli → riprocessa
     [el.maxSize, el.maxW, el.maxH].forEach((i) => i.addEventListener('input', scheduleProcess));
+    el.maxSizeUnit.dataset.prev = el.maxSizeUnit.value;
+    el.maxSizeUnit.addEventListener('change', onUnitChange);
     el.quality.addEventListener('input', () => { el.qualityVal.textContent = el.quality.value + '%'; scheduleProcess(); });
     el.scale.addEventListener('input', () => { el.scaleVal.textContent = el.scale.value + '%'; scheduleProcess(); });
     el.autoMode.addEventListener('change', () => { syncAutoUI(); scheduleProcess(); });
