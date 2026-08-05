@@ -137,6 +137,10 @@ a { color: inherit; text-decoration: none; }
 
 .icon-btn { padding: 9px; }
 
+/* Link all'app gemella (PrivaPDF) */
+.app-switch { border-color: var(--hairline-strong); color: var(--text-muted); }
+.app-switch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
 /* ---------- Header ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 40;
@@ -167,6 +171,7 @@ a { color: inherit; text-decoration: none; }
   .lang-select { max-width: 112px; font-size: 12px; padding: 7px 22px 7px 8px; }
   .lang-globe { display: none; }
   .btn-donate { padding: 9px 11px; }
+  .app-switch .lbl { display: none; }
 }
 
 /* Adattamenti RTL (arabo, urdu) */
