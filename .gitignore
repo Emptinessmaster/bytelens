@@ -11,3 +11,8 @@ desktop.ini
 # Log e temporanei
 *.log
 node_modules/
+
+# PrivaPDF vive nel proprio repository separato (github.com/Emptinessmaster/privapdf).
+# Nessuna copia deve stare qui: evita di accoppiare i due progetti.
+pdf/
+__nftest.txt
