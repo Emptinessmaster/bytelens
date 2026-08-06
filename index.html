@@ -27,6 +27,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0F1417" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+
   <link rel="stylesheet" href="styles.css" />
 
   <!-- ============================================================
@@ -367,5 +371,31 @@
 
   <script src="i18n.js"></script>
   <script src="app.js"></script>
+
+  <!-- PWA: registrazione Service Worker (network-first, aggiornamento automatico) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      var hadController = !!navigator.serviceWorker.controller;
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (refreshing) return;
+        refreshing = true;
+        if (hadController) window.location.reload();
+      });
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
+          reg.update();
+          var promote = function (sw) { if (sw) sw.postMessage('SKIP_WAITING'); };
+          if (reg.waiting) promote(reg.waiting);
+          reg.addEventListener('updatefound', function () {
+            var nw = reg.installing;
+            if (nw) nw.addEventListener('statechange', function () {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) promote(nw);
+            });
+          });
+        }).catch(function (err) { console.warn('SW registration failed:', err); });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "name": "ByteLens · Comprimi e ridimensiona immagini",
+  "short_name": "ByteLens",
+  "description": "Comprimi, ridimensiona e ottimizza le immagini nel browser. Nessun upload, funziona offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0F1417",
+  "theme_color": "#0F1417",
+  "lang": "it",
+  "categories": ["utilities", "photo", "productivity"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
