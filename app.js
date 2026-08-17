@@ -34,6 +34,8 @@
     maxSizeUnit: $('#maxSizeUnit'),
     maxW:        $('#maxW'),
     maxH:        $('#maxH'),
+    ratioSelect: $('#ratioSelect'),
+    ratioLabel:  $('#ratioLabel'),
     quality:     $('#quality'),
     qualityVal:  $('#qualityVal'),
     qualityField:$('#qualityField'),
@@ -147,30 +149,30 @@
     try {
       const mime = currentFormat();
       const isLossy = (mime === 'image/jpeg' || mime === 'image/webp');
-      const { w, h } = targetDimensions();
-      const canvas = drawCanvas(w, h);
+      const base = targetDimensions();
 
       const auto = el.autoMode.checked;
       const unitFactor = el.maxSizeUnit.value === 'KB' ? 1024 : 1024 * 1024;
       const maxBytes = num(el.maxSize, Infinity) * unitFactor;
 
-      let blob, usedQuality;
+      let blob, usedQuality, outW = base.w, outH = base.h;
 
       if (auto && isLossy && isFinite(maxBytes)) {
-        const res = await fitToBudget(canvas, mime, maxBytes);
-        blob = res.blob;
-        usedQuality = res.quality;
-        // riflette la qualità trovata sullo slider
+        // Prima abbassa la qualità; se non basta, riduce anche la risoluzione
+        // finché l'immagine rientra nel peso massimo impostato.
+        const res = await fitAuto(base.w, base.h, mime, maxBytes);
+        blob = res.blob; usedQuality = res.quality; outW = res.w; outH = res.h;
         el.quality.value = Math.round(usedQuality * 100);
         el.qualityVal.textContent = Math.round(usedQuality * 100) + '%';
       } else {
+        const canvas = drawCanvas(outW, outH);
         usedQuality = (parseInt(el.quality.value, 10) || 80) / 100;
         blob = await canvasToBlob(canvas, mime, isLossy ? usedQuality : undefined);
       }
 
       if (!blob) throw new Error('Formato non supportato dal browser.');
 
-      applyResult(blob, w, h, mime, maxBytes, auto, isLossy);
+      applyResult(blob, outW, outH, mime, maxBytes, auto, isLossy);
     } catch (err) {
       console.error(err);
       setStatus(T('status_error', 'Errore di elaborazione'), 'over');
@@ -180,29 +182,47 @@
     }
   }
 
-  // Ricerca binaria della qualità per rientrare nel budget di byte
+  // Ricerca binaria della qualità per rientrare nel budget di byte, a
+  // risoluzione fissa. Se nemmeno la qualità minima rientra, restituisce il
+  // file PIÙ PICCOLO ottenibile (qualità minima), non il più grande.
   async function fitToBudget(canvas, mime, maxBytes) {
-    let lo = 0.1, hi = 1.0, best = null, bestQ = lo;
+    const qHi = await canvasToBlob(canvas, mime, 1.0);
+    if (qHi && qHi.size <= maxBytes) return { blob: qHi, quality: 1.0 };
 
-    // se già sotto budget a qualità massima, usa quella
-    let blobHi = await canvasToBlob(canvas, mime, hi);
-    if (blobHi && blobHi.size <= maxBytes) return { blob: blobHi, quality: hi };
-
-    best = blobHi; bestQ = hi;
-    for (let i = 0; i < 8; i++) {
+    let lo = 0.05, hi = 1.0, best = null, bestQ = null;
+    for (let i = 0; i < 9; i++) {
       const mid = (lo + hi) / 2;
       const blob = await canvasToBlob(canvas, mime, mid);
       if (!blob) break;
-      if (blob.size <= maxBytes) {
-        best = blob; bestQ = mid; lo = mid; // possiamo alzare la qualità
-      } else {
-        hi = mid; // troppo pesante, abbassa
-      }
+      if (blob.size <= maxBytes) { best = blob; bestQ = mid; lo = mid; }
+      else { hi = mid; }
     }
-    // preferisci l'ultima versione sotto budget se esiste
-    const under = await canvasToBlob(canvas, mime, bestQ);
-    if (under && under.size <= maxBytes) return { blob: under, quality: bestQ };
-    return { blob: best, quality: bestQ };
+    if (best) return { blob: best, quality: bestQ };
+
+    // impossibile a questa risoluzione: qualità minima = file più piccolo
+    const qLo = await canvasToBlob(canvas, mime, 0.05);
+    return { blob: qLo || qHi, quality: 0.05 };
+  }
+
+  // Ottimizzazione automatica completa: prova al livello di dimensioni scelto;
+  // se il file resta sopra il peso massimo, riduce progressivamente la
+  // risoluzione (mantenendo il rapporto delle dimensioni target) finché rientra.
+  async function fitAuto(baseW, baseH, mime, maxBytes) {
+    let w = baseW, h = baseH;
+    let smallest = null, sQ = 0.05, sW = w, sH = h;
+    for (let step = 0; step < 12; step++) {
+      const canvas = drawCanvas(Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
+      const res = await fitToBudget(canvas, mime, maxBytes);
+      if (res.blob && res.blob.size <= maxBytes) {
+        return { blob: res.blob, quality: res.quality, w: canvas.width, h: canvas.height };
+      }
+      if (res.blob && (!smallest || res.blob.size < smallest.size)) {
+        smallest = res.blob; sQ = res.quality; sW = canvas.width; sH = canvas.height;
+      }
+      if (w <= 32 || h <= 32) break;
+      w *= 0.82; h *= 0.82;
+    }
+    return { blob: smallest, quality: sQ, w: sW, h: sH };
   }
 
   function applyResult(blob, w, h, mime, maxBytes, auto, isLossy) {
@@ -281,7 +301,13 @@
       el.origSize.textContent = fmtBytes(file.size);
       el.origDims.textContent = bitmap.width + ' × ' + bitmap.height + ' px';
 
-      // default sensati: se l'immagine è più piccola dei limiti, non ingrandire
+      // #1: i limiti in pixel partono dalle dimensioni dell'immagine originale
+      // (una 2000×2000 non viene portata a 1920×1080).
+      el.maxW.value = state.origW;
+      el.maxH.value = state.origH;
+      el.scale.value = 100; el.scaleVal.textContent = '100%';
+      if (el.ratioSelect) el.ratioSelect.value = 'orig';
+
       runProcess();
     } catch (err) {
       console.error(err);
@@ -322,6 +348,70 @@
     if (cur === 'KB') { el.maxSize.step = '10'; el.maxSize.min = '1'; }
     else { el.maxSize.step = '0.1'; el.maxSize.min = '0.01'; }
     el.maxSizeUnit.dataset.prev = cur;
+    scheduleProcess();
+  }
+
+  // ---- Proporzioni predefinite (menù a tendina) ----
+  const RATIOS = [
+    { key: 'custom' },
+    { key: 'orig' },
+    { key: '1:1',  w: 1,  h: 1 },
+    { key: '4:3',  w: 4,  h: 3 },
+    { key: '3:2',  w: 3,  h: 2 },
+    { key: '16:9', w: 16, h: 9 },
+    { key: '21:9', w: 21, h: 9 },
+    { key: '3:4',  w: 3,  h: 4 },
+    { key: '2:3',  w: 2,  h: 3 },
+    { key: '9:16', w: 9,  h: 16 },
+  ];
+  const RATIO_TXT = {
+    label:  { en: 'Aspect ratio', it: 'Proporzioni', es: 'Proporción', fr: 'Proportions', de: 'Seitenverhältnis', pt: 'Proporção', ru: 'Пропорции', zh: '比例', ja: '縦横比', ar: 'النسبة', hi: 'अनुपात', bn: 'অনুপাত', id: 'Rasio', tr: 'Oran', ur: 'تناسب' },
+    orig:   { en: 'Original', it: 'Originale', es: 'Original', fr: 'Original', de: 'Original', pt: 'Original', ru: 'Оригинал', zh: '原始尺寸', ja: '元のサイズ', ar: 'الأصلية', hi: 'मूल', bn: 'মূল', id: 'Asli', tr: 'Orijinal', ur: 'اصل' },
+    custom: { en: 'Custom', it: 'Personalizzato', es: 'Personalizado', fr: 'Personnalisé', de: 'Benutzerdefiniert', pt: 'Personalizado', ru: 'Свои', zh: '自定义', ja: 'カスタム', ar: 'مخصص', hi: 'कस्टम', bn: 'কাস্টম', id: 'Kustom', tr: 'Özel', ur: 'حسب ضرورت' },
+  };
+  function ratioLang() {
+    return (window.I18N && RATIO_TXT.label[window.I18N.current]) ? window.I18N.current : 'en';
+  }
+  function ratioText(key) {
+    const lang = ratioLang();
+    if (key === 'custom') return RATIO_TXT.custom[lang];
+    if (key === 'orig') return RATIO_TXT.orig[lang];
+    return key;
+  }
+  function buildRatioOptions() {
+    if (!el.ratioSelect) return;
+    el.ratioSelect.innerHTML = '';
+    RATIOS.forEach((r) => {
+      const o = document.createElement('option');
+      o.value = r.key;
+      o.textContent = ratioText(r.key);
+      el.ratioSelect.appendChild(o);
+    });
+    el.ratioSelect.value = 'orig';
+    if (el.ratioLabel) el.ratioLabel.textContent = RATIO_TXT.label[ratioLang()];
+  }
+  function relabelRatios() {
+    if (!el.ratioSelect) return;
+    const cur = el.ratioSelect.value;
+    Array.prototype.forEach.call(el.ratioSelect.options, (o) => { o.textContent = ratioText(o.value); });
+    if (el.ratioLabel) el.ratioLabel.textContent = RATIO_TXT.label[ratioLang()];
+    el.ratioSelect.value = cur;
+  }
+  function onRatioChange() {
+    const key = el.ratioSelect.value;
+    if (key === 'custom' || !state.bitmap) return;
+    if (key === 'orig') {
+      el.maxW.value = state.origW;
+      el.maxH.value = state.origH;
+    } else {
+      const r = RATIOS.find((x) => x.key === key);
+      if (r && r.w) {
+        // riquadro più grande di quel rapporto che rientra nell'originale
+        const s = Math.min(state.origW / r.w, state.origH / r.h);
+        el.maxW.value = Math.max(1, Math.round(r.w * s));
+        el.maxH.value = Math.max(1, Math.round(r.h * s));
+      }
+    }
     scheduleProcess();
   }
 
@@ -372,9 +462,15 @@
     });
 
     // controlli → riprocessa
-    [el.maxSize, el.maxW, el.maxH].forEach((i) => i.addEventListener('input', scheduleProcess));
+    el.maxSize.addEventListener('input', scheduleProcess);
+    // modifica manuale di larghezza/altezza → proporzione "Personalizzato"
+    [el.maxW, el.maxH].forEach((i) => i.addEventListener('input', () => {
+      if (el.ratioSelect) el.ratioSelect.value = 'custom';
+      scheduleProcess();
+    }));
     el.maxSizeUnit.dataset.prev = el.maxSizeUnit.value;
     el.maxSizeUnit.addEventListener('change', onUnitChange);
+    if (el.ratioSelect) { buildRatioOptions(); el.ratioSelect.addEventListener('change', onRatioChange); }
     el.quality.addEventListener('input', () => { el.qualityVal.textContent = el.quality.value + '%'; scheduleProcess(); });
     el.scale.addEventListener('input', () => { el.scaleVal.textContent = el.scale.value + '%'; scheduleProcess(); });
     el.autoMode.addEventListener('change', () => { syncAutoUI(); scheduleProcess(); });
@@ -398,6 +494,7 @@
     // Al cambio lingua: se un'immagine è caricata, ri-elabora per aggiornare
     // le etichette dinamiche (stato, peso nel pulsante di download).
     window.addEventListener('i18n:change', () => {
+      relabelRatios();
       if (state.bitmap) scheduleProcess();
     });
   }
