@@ -367,13 +367,6 @@ input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offs
 .empty-note { position: absolute; inset: 60px 0 0; display: grid; place-items: center; pointer-events: none; }
 .empty-note p { font-size: 13.5px; color: var(--text-faint); background: var(--surface); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--hairline); }
 
-/* ---------- Slot pubblicitari ---------- */
-.ad-slot { position: relative; margin-top: 22px; border: 1px dashed var(--hairline-strong); border-radius: var(--radius-sm); background: var(--surface-2); }
-.ad-tag { position: absolute; top: 6px; left: 10px; font: 600 9px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-faint); }
-.ad-placeholder { display: grid; place-items: center; min-height: 90px; color: var(--text-faint); font-size: 12.5px; text-align: center; padding: 20px; }
-.ad-placeholder.small { min-height: 60px; }
-.ad-leaderboard { max-width: 760px; margin-inline: auto; }
-
 /* ---------- Come funziona ---------- */
 .how { padding: 56px 0 20px; }
 .section-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; margin-bottom: 26px; }
@@ -430,4 +423,3 @@ input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offs
 .footer-links a:hover { color: var(--accent); }
 .footer-legal { border-top: 1px solid var(--hairline); padding: 16px 22px; }
 .footer-legal p { color: var(--text-faint); font-size: 12px; text-align: center; }
-.ad-footer { margin: 0; max-width: 340px; }
