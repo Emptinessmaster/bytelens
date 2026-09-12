@@ -43,7 +43,7 @@ function appHarness() {
   const api = context.window.testAPI;
   Object.assign(api.state, { bitmap: { close() {} }, origW: 2000, origH: 1000, origBytes: 5000, file: { name: 'original.png' } });
   api.el.maxW.value = '2000'; api.el.maxH.value = '1000';
-  api.el.scale.value = '100'; api.el.quality.value = '80';
+  api.el.quality.value = '80';
   api.el.maxSize.value = '2'; api.el.maxSizeUnit.value = 'MB';
   api.el.ratioSelect.value = 'orig';
   element('input[name="format"]:checked').value = 'image/jpeg';
@@ -75,14 +75,13 @@ test('loading preserves original bytes, format and dimensions despite previous l
   context.createImageBitmap = async () => ({ width: 6000, height: 4000, close() {} });
   api.el.autoMode.checked = true;
   api.el.maxW.value = '1920'; api.el.maxH.value = '1080';
-  api.el.scale.value = '50'; api.el.ratioSelect.value = '1:1';
+  api.el.ratioSelect.value = '1:1';
   const file = { name: 'original.webp', type: 'image/webp', size: 5000000, id: 'original' };
   await api.loadFile(file);
   assert.equal(api.state.outBlob, file);
   assert.equal(encodings.length, 0);
   assert.equal(Number(api.el.maxW.value), 6000);
   assert.equal(Number(api.el.maxH.value), 4000);
-  assert.equal(Number(api.el.scale.value), 100);
   assert.equal(api.el.ratioSelect.value, 'orig');
   assert.equal(api.el.newDims.textContent, '6000 × 4000 px');
   assert.equal(api.el.downloadBtn.download, 'original-bytelens.webp');

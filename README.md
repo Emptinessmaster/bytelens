@@ -15,7 +15,7 @@
 ## ✨ Caratteristiche
 
 - **Limiti automatici** — imposti max peso (MB) e max larghezza/altezza (px): l'immagine rientra da sola in entrambi.
-- **Controllo manuale** — slider di qualità e di scala per regolare tutto a mano.
+- **Controllo manuale** — cursore della qualità e campi di larghezza e altezza massime.
 - **Ricerca binaria della qualità** per centrare il peso obiettivo in pochi passaggi.
 - **Formati** JPG, WebP e PNG, con anteprima prima/dopo e percentuale di risparmio.
 - **Privacy totale** — elaborazione 100% client-side tramite HTML Canvas: nessun server, nessun upload.
@@ -36,7 +36,7 @@ La modalità automatica effettua un numero limitato di tentativi: un peso estrem
 ## 🕹️ Come si usa
 
 1. **Carica** un'immagine: trascinala nell'area, selezionala o incollala (Ctrl/Cmd+V). Il file resta originale: dimensioni, formato e peso non cambiano. I campi pixel partono dalle dimensioni originali, senza un preset 1920×1080.
-2. **Imposta i limiti** di peso e dimensioni, oppure disattiva la modalità automatica e regola qualità e scala con i cursori. L'elaborazione parte quando modifichi un controllo; da quel momento si applicano anche i limiti di sicurezza del canvas.
+2. **Imposta i limiti** di peso e dimensioni, oppure disattiva la modalità automatica e regola la qualità con il cursore. L'elaborazione parte quando modifichi un controllo; da quel momento si applicano anche i limiti di sicurezza del canvas.
 3. **Scarica** l'immagine ottimizzata: il pulsante mostra il peso finale del file.
 
 ---

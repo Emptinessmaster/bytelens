@@ -40,8 +40,6 @@
     qualityVal:  $('#qualityVal'),
     qualityField:$('#qualityField'),
     qualityHint: $('#qualityHint'),
-    scale:       $('#scale'),
-    scaleVal:    $('#scaleVal'),
     formatHint:  $('#formatHint'),
 
     compareBar:  $('#compareBar'),
@@ -116,10 +114,9 @@
   function targetDimensions() {
     const maxW = Math.min(num(el.maxW, state.origW, 1), MAX_ALLOWED.w);
     const maxH = Math.min(num(el.maxH, state.origH, 1), MAX_ALLOWED.h);
-    const scale = (parseInt(el.scale.value, 10) || 100) / 100;
 
     const source = sourceRect();
-    const factor = Math.min(scale, maxW / source.w, maxH / source.h,
+    const factor = Math.min(1, maxW / source.w, maxH / source.h,
       Math.sqrt(MAX_ALLOWED.pixels / (source.w * source.h)));
     return { w: Math.max(1, Math.floor(source.w * factor)), h: Math.max(1, Math.floor(source.h * factor)) };
   }
@@ -350,7 +347,6 @@
       // (una 2000×2000 non viene portata a 1920×1080).
       el.maxW.value = state.origW;
       el.maxH.value = state.origH;
-      el.scale.value = 100; el.scaleVal.textContent = '100%';
       if (el.ratioSelect) el.ratioSelect.value = 'orig';
       const originalFormat = document.querySelector('input[name="format"][value="' + file.type + '"]');
       if (originalFormat) originalFormat.checked = true;
@@ -528,7 +524,6 @@
     el.maxSizeUnit.addEventListener('change', onUnitChange);
     if (el.ratioSelect) { buildRatioOptions(); el.ratioSelect.addEventListener('change', onRatioChange); }
     el.quality.addEventListener('input', () => { el.qualityVal.textContent = el.quality.value + '%'; scheduleProcess(); });
-    el.scale.addEventListener('input', () => { el.scaleVal.textContent = el.scale.value + '%'; scheduleProcess(); });
     el.autoMode.addEventListener('change', () => { syncAutoUI(); scheduleProcess(); });
     document.querySelectorAll('input[name="format"]').forEach((r) =>
       r.addEventListener('change', scheduleProcess)
