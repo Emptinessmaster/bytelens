@@ -1,5 +1,7 @@
 # Graph Report - C:\Users\sante\Desktop\Claude\Git_test  (2026-08-03)
 
+> Historical snapshot: predates the September 2026 concurrency, image-limit, aspect-ratio and offline-cache fixes. Source locations and relationships must be re-extracted before using this graph as current documentation.
+
 ## Corpus Check
 - cluster-only mode — file stats not available
 

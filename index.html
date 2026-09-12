@@ -143,7 +143,7 @@
             <div class="compare-col savings">
               <span class="compare-label" data-i18n="cmp_savings">Risparmio</span>
               <span class="compare-value" id="savings">—</span>
-              <span class="compare-meta" id="statusMsg">—</span>
+              <span class="compare-meta" id="statusMsg" role="status" aria-live="polite">—</span>
             </div>
           </div>
         </div>
@@ -172,7 +172,8 @@
 
             <div class="field">
               <label class="field-label" id="ratioLabel" for="ratioSelect">Proporzioni</label>
-              <select id="ratioSelect" class="ratio-select" aria-label="Proporzioni"></select>
+              <select id="ratioSelect" class="ratio-select" aria-label="Proporzioni" aria-describedby="ratioHint"></select>
+              <p class="field-hint" id="ratioHint" data-i18n="ratio_hint">I preset ritagliano al centro senza deformare. Originale e Personalizzato mantengono le proporzioni originali.</p>
             </div>
 
             <div class="limits-grid">
@@ -189,14 +190,14 @@
               <div class="field">
                 <label class="field-label" for="maxW" data-i18n="maxw">Larghezza max</label>
                 <div class="input-affix">
-                  <input type="number" id="maxW" min="1" step="1" value="1920" inputmode="numeric" />
+                  <input type="number" id="maxW" min="1" step="1" inputmode="numeric" />
                   <span class="affix">px</span>
                 </div>
               </div>
               <div class="field">
                 <label class="field-label" for="maxH" data-i18n="maxh">Altezza max</label>
                 <div class="input-affix">
-                  <input type="number" id="maxH" min="1" step="1" value="1080" inputmode="numeric" />
+                  <input type="number" id="maxH" min="1" step="1" inputmode="numeric" />
                   <span class="affix">px</span>
                 </div>
               </div>
@@ -208,7 +209,7 @@
                 <label class="field-label" for="quality" data-i18n="quality">Qualità</label>
                 <output class="field-value" id="qualityVal" for="quality">80%</output>
               </div>
-              <input type="range" id="quality" min="10" max="100" step="1" value="80" />
+              <input type="range" id="quality" min="5" max="100" step="1" value="80" />
               <p class="field-hint" id="qualityHint" data-i18n="quality_hint">In modalità automatica la qualità viene calcolata per rientrare nel peso massimo.</p>
             </div>
 
@@ -280,7 +281,7 @@
         <p data-i18n="seo_pa">Imposta il Peso massimo su 2 MB e lascia attiva la modalità automatica: ByteLens trova la qualità più alta che mantiene il file sotto la soglia, per il miglior compromesso tra leggerezza e nitidezza.</p>
 
         <h3 data-i18n="seo_h3b">Ridimensionare a 1920×1080 o a misure esatte</h3>
-        <p data-i18n="seo_pb">Imposta i campi Larghezza max e Altezza max. Ogni lato è regolato in modo indipendente: se riduci solo la larghezza, l'altezza resta invariata. Per ridurre in modo uniforme usa il cursore Scala dimensioni.</p>
+        <p data-i18n="seo_pb">Larghezza e altezza sono limiti massimi. Entrambi vengono rispettati mantenendo le proporzioni. I preset ritagliano al centro.</p>
 
         <h3 data-i18n="seo_h3c">JPG, WebP o PNG: quale scegliere?</h3>
         <ul class="seo-list">
@@ -304,7 +305,7 @@
         </details>
         <details class="faq-item">
           <summary data-i18n="faq_q3">Posso impostare dimensioni precise in pixel?</summary>
-          <p data-i18n="faq_a3">Sì. Inserisci larghezza e altezza massime. Ogni dimensione è applicata in modo indipendente: riducendo solo la larghezza, l'altezza non cambia.</p>
+          <p data-i18n="faq_a3">Larghezza e altezza sono limiti massimi. Entrambi vengono rispettati mantenendo le proporzioni. I preset ritagliano al centro.</p>
         </details>
         <details class="faq-item">
           <summary data-i18n="faq_q4">Perché in automatico la qualità cambia da sola?</summary>
@@ -357,6 +358,7 @@
   </footer>
 
   <script src="i18n.js"></script>
+  <script src="image-limits.js"></script>
   <script src="app.js"></script>
 
   <!-- PWA: registrazione Service Worker (network-first, aggiornamento automatico) -->

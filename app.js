@@ -71,7 +71,10 @@
     queued: false,
   };
 
-  const MAX_ALLOWED = { w: 20000, h: 20000 }; // guardrail anti-crash canvas
+  const MAX_ALLOWED = { w: 8192, h: 8192, pixels: 16000000 };
+  let revision = 0;
+  let loadSequence = 0;
+  let decodeQueue = Promise.resolve();
 
   // ---- Utilità ----
   function fmtBytes(bytes) {
@@ -99,19 +102,26 @@
     return v;
   }
 
-  // Calcola le dimensioni target: larghezza e altezza vengono limitate in modo
-  // INDIPENDENTE, senza vincolo di proporzioni. Impostando maxW/maxH diversi
-  // dal rapporto originale, l'immagine viene deformata di conseguenza
-  // (es. 1920x1080 con maxW 900 -> 900x1080: solo la larghezza si riduce).
+  // I limiti mantengono le proporzioni; un preset applica un ritaglio centrale.
+  function sourceRect() {
+    let w = state.origW, h = state.origH;
+    const ratio = RATIOS.find((r) => r.key === el.ratioSelect?.value);
+    if (ratio && ratio.w) {
+      if (w / h > ratio.w / ratio.h) w = h * ratio.w / ratio.h;
+      else h = w * ratio.h / ratio.w;
+    }
+    return { x: (state.origW - w) / 2, y: (state.origH - h) / 2, w, h };
+  }
+
   function targetDimensions() {
     const maxW = Math.min(num(el.maxW, state.origW, 1), MAX_ALLOWED.w);
     const maxH = Math.min(num(el.maxH, state.origH, 1), MAX_ALLOWED.h);
     const scale = (parseInt(el.scale.value, 10) || 100) / 100;
 
-    // scala uniforme (percentuale), poi limite indipendente per ciascun lato
-    const w = Math.min(state.origW * scale, maxW);
-    const h = Math.min(state.origH * scale, maxH);
-    return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)) };
+    const source = sourceRect();
+    const factor = Math.min(scale, maxW / source.w, maxH / source.h,
+      Math.sqrt(MAX_ALLOWED.pixels / (source.w * source.h)));
+    return { w: Math.max(1, Math.floor(source.w * factor)), h: Math.max(1, Math.floor(source.h * factor)) };
   }
 
   // Disegna il bitmap su canvas alle dimensioni date
@@ -120,23 +130,37 @@
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas unavailable');
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(state.bitmap, 0, 0, w, h);
+    const source = sourceRect();
+    ctx.drawImage(state.bitmap, source.x, source.y, source.w, source.h, 0, 0, w, h);
     return canvas;
   }
 
   function canvasToBlob(canvas, mime, quality) {
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), mime, quality);
+    const ticket = revision;
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (ticket !== revision) reject(new DOMException('Cancelled', 'AbortError'));
+        else if (!blob || blob.type !== mime) reject(new Error('Unsupported output format'));
+        else resolve(blob);
+      }, mime, quality);
     });
   }
 
   // ---- Elaborazione principale (debounced) ----
   let debounceTimer = null;
+  function invalidateResult() {
+    revision++;
+    clearTimeout(debounceTimer);
+    el.downloadBtn.setAttribute('aria-disabled', 'true');
+    el.downloadBtn.removeAttribute('href');
+  }
+
   function scheduleProcess() {
     if (!state.bitmap) return;
-    clearTimeout(debounceTimer);
+    invalidateResult();
     debounceTimer = setTimeout(runProcess, 140);
   }
 
@@ -144,6 +168,7 @@
     if (!state.bitmap) return;
     if (state.busy) { state.queued = true; return; }
     state.busy = true;
+    const ticket = revision;
     setStatus(T('status_processing', 'Elaborazione…'), 'neutral');
 
     try {
@@ -161,21 +186,27 @@
         // Prima abbassa la qualità; se non basta, riduce anche la risoluzione
         // finché l'immagine rientra nel peso massimo impostato.
         const res = await fitAuto(base.w, base.h, mime, maxBytes);
+        if (ticket !== revision) return;
         blob = res.blob; usedQuality = res.quality; outW = res.w; outH = res.h;
         el.quality.value = Math.round(usedQuality * 100);
         el.qualityVal.textContent = Math.round(usedQuality * 100) + '%';
       } else {
         const canvas = drawCanvas(outW, outH);
         usedQuality = (parseInt(el.quality.value, 10) || 80) / 100;
-        blob = await canvasToBlob(canvas, mime, isLossy ? usedQuality : undefined);
+        try {
+          blob = await canvasToBlob(canvas, mime, isLossy ? usedQuality : undefined);
+        } finally { canvas.width = 0; canvas.height = 0; }
       }
 
       if (!blob) throw new Error('Formato non supportato dal browser.');
+      if (ticket !== revision) return;
 
       applyResult(blob, outW, outH, mime, maxBytes, auto, isLossy);
     } catch (err) {
-      console.error(err);
-      setStatus(T('status_error', 'Errore di elaborazione'), 'over');
+      if (ticket === revision && err.name !== 'AbortError') {
+        console.error(err);
+        setStatus(T('status_error', 'Errore di elaborazione'), 'over');
+      }
     } finally {
       state.busy = false;
       if (state.queued) { state.queued = false; runProcess(); }
@@ -212,13 +243,15 @@
     let smallest = null, sQ = 0.05, sW = w, sH = h;
     for (let step = 0; step < 12; step++) {
       const canvas = drawCanvas(Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
-      const res = await fitToBudget(canvas, mime, maxBytes);
-      if (res.blob && res.blob.size <= maxBytes) {
-        return { blob: res.blob, quality: res.quality, w: canvas.width, h: canvas.height };
-      }
-      if (res.blob && (!smallest || res.blob.size < smallest.size)) {
-        smallest = res.blob; sQ = res.quality; sW = canvas.width; sH = canvas.height;
-      }
+      try {
+        const res = await fitToBudget(canvas, mime, maxBytes);
+        if (res.blob && res.blob.size <= maxBytes) {
+          return { blob: res.blob, quality: res.quality, w: canvas.width, h: canvas.height };
+        }
+        if (res.blob && (!smallest || res.blob.size < smallest.size)) {
+          smallest = res.blob; sQ = res.quality; sW = canvas.width; sH = canvas.height;
+        }
+      } finally { canvas.width = 0; canvas.height = 0; }
       if (w <= 32 || h <= 32) break;
       w *= 0.82; h *= 0.82;
     }
@@ -281,8 +314,20 @@
       alert(T('alert_format', 'Formato non supportato. Usa JPG, PNG o WebP.'));
       return;
     }
+    reset();
+    const ticket = loadSequence;
     try {
-      const bitmap = await createImageBitmap(file);
+      await window.ImageLimits.validate(file);
+      if (ticket !== loadSequence) return;
+      // Una sola decodifica alla volta, anche con selezioni ripetute rapidamente.
+      const bitmap = await (decodeQueue = decodeQueue.catch(() => {}).then(() =>
+        ticket === loadSequence ? createImageBitmap(file) : null));
+      if (!bitmap) return;
+      if (ticket !== loadSequence) { bitmap.close(); return; }
+      if (bitmap.width * bitmap.height > window.ImageLimits.maxPixels) {
+        bitmap.close();
+        throw new RangeError('Image too large');
+      }
       if (state.bitmap && state.bitmap.close) state.bitmap.close();
       state.bitmap = bitmap;
       state.file = file;
@@ -307,15 +352,25 @@
       el.maxH.value = state.origH;
       el.scale.value = 100; el.scaleVal.textContent = '100%';
       if (el.ratioSelect) el.ratioSelect.value = 'orig';
+      const originalFormat = document.querySelector('input[name="format"][value="' + file.type + '"]');
+      if (originalFormat) originalFormat.checked = true;
 
-      runProcess();
+      // Il caricamento conserva il file originale; elabora solo dopo un cambio dei controlli.
+      applyResult(file, bitmap.width, bitmap.height, file.type, Infinity, false,
+        file.type !== 'image/png');
     } catch (err) {
+      if (ticket !== loadSequence) return;
       console.error(err);
-      alert(T('alert_read', 'Impossibile leggere l\'immagine. Prova con un altro file.'));
+      alert(err.name === 'RangeError'
+        ? T('alert_limits', 'Immagine troppo grande: massimo 64 MiB, 32 megapixel e 32768 pixel per lato.')
+        : T('alert_read', 'Impossibile leggere l\'immagine. Prova con un altro file.'));
     }
   }
 
   function reset() {
+    loadSequence++;
+    invalidateResult();
+    state.queued = false;
     if (state.bitmap && state.bitmap.close) state.bitmap.close();
     if (state.outUrl) URL.revokeObjectURL(state.outUrl);
     Object.assign(state, { bitmap: null, file: null, origBytes: 0, origW: 0, origH: 0, outBlob: null, outUrl: null });
@@ -332,7 +387,8 @@
     el.fileInput.value = '';
     el.downloadBtn.setAttribute('aria-disabled', 'true');
     el.downloadBtn.removeAttribute('href');
-    el.downloadLabel.textContent = 'Scarica immagine';
+    el.downloadLabel.textContent = T('download', 'Scarica immagine');
+    setStatus('—', 'neutral');
   }
 
   // ---- Cambio unità di misura del peso (MB <-> KB) con conversione del valore ----
@@ -399,7 +455,7 @@
   }
   function onRatioChange() {
     const key = el.ratioSelect.value;
-    if (key === 'custom' || !state.bitmap) return;
+    if (!state.bitmap) return;
     if (key === 'orig') {
       el.maxW.value = state.origW;
       el.maxH.value = state.origH;

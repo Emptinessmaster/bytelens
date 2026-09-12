@@ -4,6 +4,8 @@
    fondo inchiostro, superfici slate, accento ambra (camera oscura).
    ========================================================================= */
 
+[hidden] { display: none !important; }
+
 :root {
   /* Neutri con leggera inclinazione fredda (scelti, non di default) */
   --bg:            #0F1417;
