@@ -8,15 +8,15 @@
      "congelata" su una copia vecchia in cache); offline usa la cache.
    - Risorse cross-origin (es. Google Fonts): CACHE-FIRST con runtime caching.
    ========================================================================= */
-var CACHE = 'bytelens-v2';
+var CACHE = 'bytelens-v3';
 
 var APP_SHELL = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
-  './image-limits.js',
-  './i18n.js',
+  './styles.css?v=20260912-2',
+  './app.js?v=20260912-2',
+  './image-limits.js?v=20260912-2',
+  './i18n.js?v=20260912-2',
   './privacy.html',
   './manifest.webmanifest',
   './icon.svg',

@@ -235,7 +235,7 @@ function workerHarness() {
     self: { location: { origin: 'https://example.test' }, clients: { claim() {} },
       skipWaiting() {}, addEventListener: (type, callback) => { listeners[type] = callback; } },
     caches: {
-      keys: async () => ['bytelens-v1', 'bytelens-v2', 'privapdf-v1'],
+      keys: async () => ['bytelens-v1', 'bytelens-v2', 'bytelens-v3', 'privapdf-v1'],
       delete: async key => { deleted.push(key); },
       open: async name => { opened.push(name); return {
         put: async (key, response) => { writes.push(key); cached.set(key, response); },
@@ -252,7 +252,7 @@ test('service worker activation preserves other applications caches', async () =
   let pending;
   listeners.activate({ waitUntil: promise => { pending = promise; } });
   await pending;
-  assert.deepEqual(deleted, ['bytelens-v1']);
+  assert.deepEqual(deleted, ['bytelens-v1', 'bytelens-v2']);
 });
 
 test('service worker scopes offline reads and never caches HTTP errors', async () => {
@@ -269,7 +269,7 @@ test('service worker scopes offline reads and never caches HTTP errors', async (
   context.fetch = async () => { throw new Error('offline'); };
   listeners.fetch(event);
   assert.equal(await (await response).text(), 'offline shell');
-  assert.ok(opened.every(name => name === 'bytelens-v2'));
+  assert.ok(opened.every(name => name === 'bytelens-v3'));
   context.fetch = async () => new Response('fresh');
   listeners.fetch(event);
   assert.equal(await (await response).text(), 'fresh');
